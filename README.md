@@ -1,0 +1,2 @@
+# gobuj
+static website
