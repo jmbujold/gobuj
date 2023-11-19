@@ -77,18 +77,25 @@ body {
 <div id="title">Farming Game</div>
 <ul class="selectionOptions">
   <li>
-    <input type="radio" id="wildflower" name="selection" />
+    <input type="radio" id="wildflower" name="selection" value="wildflower" checked/>
     <label for="wildflower">🌸</label>
   </li>
   <li>
-    <input type="radio" id="premium" name="selection" />
+    <input type="radio" id="premium" name="selection" value = "premium"/>
     <label for="premium">🌱</label>
+    </li>
+  <li>
+    <input type="radio" id="axe" name="selection" value = "axe"/>
+    <label for="axe">⛏️</label>
   </li>
+    
+   
 
 </ul>
     
 <div id="farm-container"></div>
-<div id="money">Starting Money: $75/div>
+<div id="money">🪙: $75</div>
+<a href="howto.html">How to Play</a>
 
 <script>
     const farmContainer = document.getElementById('farm-container');
@@ -110,7 +117,11 @@ body {
 
     function handleCellClick() {
         const cell = this;
-        if (!cell.textContent && money>=5) {
+        //get radio button selection
+        let action = document.querySelector('input[name="selection"]:checked').value;
+        
+        
+        if (!cell.textContent && action=="premium" && money>=5 ) {
             // Plant a seed and deduct $5
             cell.textContent = '🌱';
             money -= 5;
@@ -124,15 +135,23 @@ body {
                 cell.textContent = newFruit;
             }, fruitTime); // seconds timer based on fruit
         }
+        else if (!cell.textContent && action=="wildflower") {
+            // Plant a wildflower for free
+            cell.textContent = '🌸';
+            // Start a timer for the plant to grow
+            setTimeout(() => {
+                cell.textContent = '🌻';
+            }, 10000); // seconds timer based on fruit
+        }
         else{
-            handleFruitClick(cell,cell.textContent)
+            handleFruitClick(cell,cell.textContent, action)
         }
     }
 
-    function handleFruitClick(cell, fruit) {
+    function handleFruitClick(cell, fruit, action) {
         switch (fruit) {
             case '🪨':
-                if(money >= 25){
+                if(money >= 25 && action == "axe"){
                     money -= 25;
                     break;
                 }
@@ -150,13 +169,16 @@ body {
             case '🍌':
                 money += 15;
                 break;
+            case '🌻':
+                money +=2;
+                break;
         }
         updateMoneyDisplay();
         cell.textContent = '';
     }
 
     function updateMoneyDisplay() {
-        moneyDisplay.textContent = `Current Money: $${money}`;
+        moneyDisplay.textContent = `🪙: ${money}`;
     }
 
     function generateRandomFruit() {
