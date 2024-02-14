@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+        <title>Mocking Spongebob Meme</title>
+        <style type="text/css">            
+            .container {
+              position: relative;
+              text-align: center;
+              color: white;
+            }
+
+            .centered {
+              position: absolute;
+              top: 15%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              font-family: impact;
+              font-size: 50px;
+              font-style: b
+            }
+            label{
+                color: black;
+            }
+        </style>
+        <link href="https://fonts.googleapis.com/css?family=Anton&amp;subset=latin-ext"
+              rel="stylesheet">
+
+    </head>
+
+    
+<body>
+<h1>Mocking Spongebob Meme Template</h1>
+
+
+<div class="container">
+    <label>Input Text:</label>
+    <textarea id="input"></textarea>
+    <label>Output Text:</label>
+    <textarea id="output" readonly></textarea>
+    <br>
+    <img src="mock.jpg" alt="spongebob" style="width:60%;">
+    <div class="centered" id="imageText"></div>
+</div>
+     
+<script>
+    var input = document.getElementById("input")
+
+    
+    input.addEventListener("keyup", (event) => {
+            var text = document.getElementById("input").value
+            result = translate(text)
+          document.getElementById("output").innerHTML = result;
+          document.getElementById("imageText").innerHTML = result;
+    } )
+  
+    function translate(text){
+        mockText = ""
+        for (let i = 0; i < text.length; i++) {
+            if (Math.random() >= 0.5){
+            mockText += text[i].toUpperCase();
+            }
+            else{
+            mockText += text[i].toLowerCase();
+            }
+        }
+        return mockText;
+    }
+</script>
+
+</body>
+</html>
