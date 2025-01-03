@@ -20,17 +20,24 @@
 
             .centered {
                 position: absolute;
-                top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translateX(-50%);
                 font-family: impact, sans-serif;
                 font-size: 50px;
                 font-weight: bold;
-                text-transform: uppercase;
                 text-shadow: 2px 2px 4px #000000;
                 text-align: center;
                 width: 90%;
                 word-wrap: break-word;
+                color: white;
+            }
+
+            .top-text {
+                top: 10%;
+            }
+
+            .bottom-text {
+                bottom: 10%;
             }
 
             label {
@@ -79,13 +86,15 @@
 
         <div class="container">
             <img id="memeImage" src="mock.jpg" alt="Spongebob" style="width: 60%;">
-            <div class="centered" id="imageText"></div>
+            <div class="centered top-text" id="topText"></div>
+            <div class="centered bottom-text" id="bottomText"></div>
         </div>
 
         <script>
             const input = document.getElementById("input");
             const output = document.getElementById("output");
-            const imageText = document.getElementById("imageText");
+            const topText = document.getElementById("topText");
+            const bottomText = document.getElementById("bottomText");
             const copyBtn = document.getElementById("copyBtn");
             const downloadBtn = document.getElementById("downloadBtn");
             const memeImage = document.getElementById("memeImage");
@@ -95,7 +104,17 @@
                 const text = input.value;
                 const result = translate(text);
                 output.value = result;
-                imageText.innerHTML = result;
+
+                // Determine if the text should be split into two lines
+                const lines = result.split(" ");
+                if (lines.length > 6) {
+                    const mid = Math.ceil(lines.length / 2);
+                    topText.innerHTML = lines.slice(0, mid).join(" ");
+                    bottomText.innerHTML = lines.slice(mid).join(" ");
+                } else {
+                    topText.innerHTML = result;
+                    bottomText.innerHTML = "";
+                }
             });
 
             // Mocking text transformation
@@ -133,19 +152,29 @@
                 // Draw image on canvas
                 ctx.drawImage(memeImage, 0, 0, imgWidth, imgHeight);
 
-                // Add text overlay
+                // Add top text
                 ctx.font = "50px Impact";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = "black";
+                const topTextContent = topText.innerHTML;
+                const bottomTextContent = bottomText.innerHTML;
 
-                const text = output.value;
                 const x = canvas.width / 2;
-                const y = canvas.height / 2; // Center text vertically
-                const maxWidth = canvas.width * 0.8; // Limit text width
-                wrapText(ctx, text, x, y, maxWidth, 60);
+
+                if (bottomTextContent) {
+                    // Multi-line text
+                    ctx.strokeText(topTextContent, x, canvas.height * 0.15);
+                    ctx.fillText(topTextContent, x, canvas.height * 0.15);
+                    ctx.strokeText(bottomTextContent, x, canvas.height * 0.85);
+                    ctx.fillText(bottomTextContent, x, canvas.height * 0.85);
+                } else {
+                    // Single-line text
+                    ctx.strokeText(topTextContent, x, canvas.height * 0.15);
+                    ctx.fillText(topTextContent, x, canvas.height * 0.15);
+                }
 
                 // Download canvas as image
                 const link = document.createElement("a");
@@ -153,31 +182,6 @@
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
-
-            // Helper function to wrap text
-            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-                const words = text.split(" ");
-                let line = "";
-                let lines = [];
-
-                for (let n = 0; n < words.length; n++) {
-                    const testLine = line + words[n] + " ";
-                    const metrics = ctx.measureText(testLine);
-                    const testWidth = metrics.width;
-                    if (testWidth > maxWidth && n > 0) {
-                        lines.push(line);
-                        line = words[n] + " ";
-                    } else {
-                        line = testLine;
-                    }
-                }
-                lines.push(line);
-
-                lines.forEach((l, i) => {
-                    ctx.strokeText(l, x, y + i * lineHeight);
-                    ctx.fillText(l, x, y + i * lineHeight);
-                });
-            }
         </script>
     </body>
 </html>
