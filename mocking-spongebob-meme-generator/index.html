@@ -4,26 +4,49 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
         <title>Mocking Spongebob Meme</title>
-        <style type="text/css">            
+        <style type="text/css">
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 20px;
+            }
+
             .container {
                 position: relative;
-                text-align: center;
+                display: inline-block;
+                margin-top: 20px;
                 color: white;
             }
 
             .centered {
                 position: absolute;
-                top: 15%;
+                top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                font-family: impact;
+                font-family: impact, sans-serif;
                 font-size: 50px;
                 font-weight: bold;
+                text-transform: uppercase;
                 text-shadow: 2px 2px 4px #000000;
+                text-align: center;
+                width: 90%;
+                word-wrap: break-word;
             }
 
             label {
-                color: black;
+                display: inline-block;
+                margin-top: 10px;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            textarea {
+                display: block;
+                width: 90%;
+                margin: 0 auto;
+                margin-bottom: 15px;
+                padding: 10px;
+                font-size: 16px;
             }
 
             button {
@@ -40,26 +63,22 @@
             button:hover {
                 background-color: #45a049;
             }
-
-            textarea {
-                width: 90%;
-                margin: 10px 0;
-            }
         </style>
     </head>
     <body>
         <h1>Mocking Spongebob Meme Template</h1>
 
+        <label for="input">Input Text:</label>
+        <textarea id="input"></textarea>
+
+        <label for="output">Output Text:</label>
+        <textarea id="output" readonly></textarea>
+
+        <button id="copyBtn">Copy to Clipboard</button>
+        <button id="downloadBtn">Download Meme</button>
+
         <div class="container">
-            <label>Input Text:</label>
-            <textarea id="input"></textarea>
-            <label>Output Text:</label>
-            <textarea id="output" readonly></textarea>
-            <br>
-            <button id="copyBtn">Copy to Clipboard</button>
-            <button id="downloadBtn">Download Meme</button>
-            <br>
-            <img id="memeImage" src="mock.jpg" alt="spongebob" style="width:60%;">
+            <img id="memeImage" src="mock.jpg" alt="Spongebob" style="width: 60%;">
             <div class="centered" id="imageText"></div>
         </div>
 
@@ -71,7 +90,7 @@
             const downloadBtn = document.getElementById("downloadBtn");
             const memeImage = document.getElementById("memeImage");
 
-            // Listen for text input changes
+            // Update text dynamically
             input.addEventListener("keyup", () => {
                 const text = input.value;
                 const result = translate(text);
@@ -96,7 +115,7 @@
             copyBtn.addEventListener("click", () => {
                 const textToCopy = output.value;
                 navigator.clipboard.writeText(textToCopy)
-                    .then(() => alert("Text copied to clipboard!"))
+                    .then(() => alert("Overlay text copied to clipboard!"))
                     .catch(() => alert("Failed to copy text."));
             });
 
@@ -106,8 +125,8 @@
                 const ctx = canvas.getContext("2d");
 
                 // Set canvas size to match image
-                const imgWidth = memeImage.width;
-                const imgHeight = memeImage.height;
+                const imgWidth = memeImage.naturalWidth;
+                const imgHeight = memeImage.naturalHeight;
                 canvas.width = imgWidth;
                 canvas.height = imgHeight;
 
@@ -118,14 +137,15 @@
                 ctx.font = "50px Impact";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
-                ctx.textBaseline = "top";
-                ctx.lineWidth = 2;
+                ctx.textBaseline = "middle";
+                ctx.lineWidth = 4;
                 ctx.strokeStyle = "black";
+
                 const text = output.value;
                 const x = canvas.width / 2;
-                const y = 15; // Adjust as needed
-                ctx.strokeText(text, x, y);
-                ctx.fillText(text, x, y);
+                const y = canvas.height / 2; // Center text vertically
+                const maxWidth = canvas.width * 0.8; // Limit text width
+                wrapText(ctx, text, x, y, maxWidth, 60);
 
                 // Download canvas as image
                 const link = document.createElement("a");
@@ -133,6 +153,31 @@
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
+
+            // Helper function to wrap text
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(" ");
+                let line = "";
+                let lines = [];
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + " ";
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        lines.push(line);
+                        line = words[n] + " ";
+                    } else {
+                        line = testLine;
+                    }
+                }
+                lines.push(line);
+
+                lines.forEach((l, i) => {
+                    ctx.strokeText(l, x, y + i * lineHeight);
+                    ctx.fillText(l, x, y + i * lineHeight);
+                });
+            }
         </script>
     </body>
 </html>
