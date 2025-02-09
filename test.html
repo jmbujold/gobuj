@@ -54,24 +54,33 @@
         const incorrectCountDisplay = document.getElementById("incorrectCount");
         let revealedGroups = new Map();
 
-        // Fetch CSV file from GitHub
-        function loadCSV() {
-            const csvUrl = "https://github.com/jmbujold/gobuj/main/words.csv"; // Replace with your GitHub raw file URL
+function loadCSV() {
+    const csvUrl = "http://gobuj.com/words.csv"; // Updated to point to your domain
 
-            fetch(csvUrl)
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split("\n").slice(1); // Remove header row
-                    words = lines.map(line => {
-                        const [word, group] = line.split(",");
-                        return { word: word.trim(), group: parseInt(group.trim()) };
-                    });
-                    renderGrid();
-                })
-                .catch(error => {
-                    console.error("Error loading CSV file:", error);
-                });
-        }
+    console.log("Fetching CSV file from:", csvUrl); // Log URL to check
+    fetch(csvUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        })
+        .then(data => {
+            console.log("CSV data loaded:", data); // Log the raw CSV data
+            const lines = data.split("\n").slice(1); // Remove header row
+            console.log("CSV lines:", lines); // Log the lines after splitting
+            words = lines.map(line => {
+                const [word, group] = line.split(",");
+                return { word: word.trim(), group: parseInt(group.trim()) };
+            });
+            console.log("Parsed words:", words); // Log the parsed words array
+            renderGrid();
+        })
+        .catch(error => {
+            console.error("Error loading CSV file:", error);
+        });
+}
+
 
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
