@@ -42,42 +42,56 @@
     <button onclick="checkSelection()">Submit</button>
     <button onclick="shuffleUnrevealed()">Shuffle</button>
     <button onclick="deselectAll()">Deselect All</button>
-    <button onclick="restartGame()">Restart Game</button>
     <p id="message"></p>
     <p class="incorrect-count">Incorrect guesses remaining: <span id="incorrectCount">3</span></p>
 
     <script>
-        let words = [];
+        const wordGroups = {
+            "2025-02-09": {
+                group1: ["Apple", "Orange", "Banana", "Grape"],
+                group2: ["Red", "Blue", "Yellow", "Green"],
+                group3: ["Violin", "Guitar", "Piano", "Drum"],
+                group4: ["Circle", "Square", "Triangle", "Rectangle"]
+            },
+            "2025-02-10": {
+                group1: ["Feb10", "George", "Ringo", "Paul"],
+                group2: ["Red", "Blue", "Yellow", "Green"],
+                group3: ["Violin", "Guitar", "Piano", "Drum"],
+                group4: ["Circle", "Square", "Triangle", "Rectangle"]
+            },
+            "2025-02-11": {
+                group1: ["Feb11", "Feb11", "Feb11", "Paul"],
+                group2: ["Red", "Feb11", "Feb11", "Green"],
+                group3: ["Violin", "Feb11", "Feb11", "Drum"],
+                group4: ["Circle", "Feb11", "Feb11", "Rectangle"]
+            },
+            
+            // You can add more dates and groups here
+        };
+
+            // You can add more date-based groups in the future as needed
+        };
+
         let selectedWords = [];
         let incorrectGuesses = 3;
         const grid = document.getElementById("grid");
         const incorrectCountDisplay = document.getElementById("incorrectCount");
         let revealedGroups = new Map();
-
-function loadJSON() {
-    const jsonUrl = "http://gobuj.com/words.json"; // Updated to point to your JSON file
-
-    console.log("Fetching JSON file from:", jsonUrl); // Log URL to check
-    fetch(jsonUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json(); // Parse the JSON directly
-        })
-        .then(data => {
-            console.log("JSON data loaded:", data); // Log the loaded data
-            words = data; // Directly assign the JSON array
-            renderGrid();
-        })
-        .catch(error => {
-            console.error("Error loading JSON file:", error);
-        });
-}
-
+        let words = [];
 
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
+        }
+
+        function getWordsForToday() {
+            const today = new Date().toISOString().split('T')[0]; // Get the current date in YYYY-MM-DD format
+            console.log(today)
+            if (wordGroups[today]) {
+                words = wordGroups[today];
+                renderGrid();
+            } else {
+                alert("No word group available for today.");
+            }
         }
 
         function renderGrid() {
@@ -119,20 +133,15 @@ function loadJSON() {
         function toggleSelect(element) {
             if (element.classList.contains("selected")) {
                 element.classList.remove("selected");
-                selectedWords = selectedWords.filter(word => word !== element.innerText);
+                selectedWords = selectedWords.filter(word => word !== element);
             } else if (selectedWords.length < 4) {
                 element.classList.add("selected");
-                selectedWords.push(element.innerText);
+                selectedWords.push(element);
             }
         }
 
         function deselectAll() {
-            selectedWords.forEach(word => {
-                let wordElement = Array.from(grid.children).find(item => item.innerText === word);
-                if (wordElement) {
-                    wordElement.classList.remove("selected");
-                }
-            });
+            selectedWords.forEach(word => word.classList.remove("selected"));
             selectedWords = [];
         }
 
@@ -142,9 +151,7 @@ function loadJSON() {
                 return;
             }
 
-            const groups = selectedWords.map(word => {
-                return words.find(w => w.word === word).group;
-            });
+            const groups = selectedWords.map(word => word.dataset.group);
             const groupCounts = groups.reduce((acc, group) => {
                 acc[group] = (acc[group] || 0) + 1;
                 return acc;
@@ -157,4 +164,35 @@ function loadJSON() {
                 const groupClass = `correct-${groups[0]}`;
                 revealedGroups.set(parseInt(groups[0]), true);
                 selectedWords.forEach(word => {
-                    let word
+                    word.classList.remove("selected");
+                    word.classList.add(groupClass);
+                    word.onclick = null;
+                });
+                document.getElementById("message").innerText = "Correct! Keep going.";
+                updateGrid();
+            } else if (hasThreeCorrect) {
+                document.getElementById("message").innerText = "1 wrong.";
+            } else {
+                incorrectGuesses--;
+                incorrectCountDisplay.innerText = incorrectGuesses;
+                document.getElementById("message").innerText = "Incorrect. Try again.";
+                selectedWords.forEach(word => word.classList.remove("selected"));
+                if (incorrectGuesses === 0) {
+                    revealGroups();
+                }
+            }
+
+            selectedWords = [];
+        }
+
+        function revealGroups() {
+            document.getElementById("message").innerText = "Game over! Revealing correct groups.";
+            words.forEach(word => revealedGroups.set(word.group, true));
+            updateGrid();
+        }
+
+        // Start the game
+        getWordsForToday();
+    </script>
+</body>
+</html>
