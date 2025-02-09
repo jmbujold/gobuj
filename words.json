@@ -1,0 +1,18 @@
+[
+    { "word": "Apple", "group": 1 },
+    { "word": "Banana", "group": 1 },
+    { "word": "Cherry", "group": 1 },
+    { "word": "Grape", "group": 1 },
+    { "word": "Red", "group": 2 },
+    { "word": "Blue", "group": 2 },
+    { "word": "Yellow", "group": 2 },
+    { "word": "Green", "group": 2 },
+    { "word": "Violin", "group": 3 },
+    { "word": "Guitar", "group": 3 },
+    { "word": "Piano", "group": 3 },
+    { "word": "Drum", "group": 3 },
+    { "word": "Circle", "group": 4 },
+    { "word": "Square", "group": 4 },
+    { "word": "Triangle", "group": 4 },
+    { "word": "Rectangle", "group": 4 }
+]
