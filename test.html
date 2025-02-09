@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .word {
+            padding: 15px;
+            background-color: lightgray;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .selected {
+            background-color: gray;
+        }
+        .correct-4 { background-color: purple; color: white; }
+        .correct-3 { background-color: blue; color: white; }
+        .correct-2 { background-color: yellow; color: black; }
+        .correct-1 { background-color: green; color: white; }
+        .incorrect-count {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connections Game</h1>
+    <div class="grid" id="grid"></div>
+    <button onclick="checkSelection()">Submit</button>
+    <button onclick="shuffleUnrevealed()">Shuffle</button>
+    <button onclick="deselectAll()">Deselect All</button>
+    <button onclick="restartGame()">Restart Game</button>
+    <p id="message"></p>
+    <p class="incorrect-count">Incorrect guesses remaining: <span id="incorrectCount">3</span></p>
+
+    <script>
+        let words = [];
+        let selectedWords = [];
+        let incorrectGuesses = 3;
+        const grid = document.getElementById("grid");
+        const incorrectCountDisplay = document.getElementById("incorrectCount");
+        let revealedGroups = new Map();
+
+        // Fetch CSV file from GitHub
+        function loadCSV() {
+            const csvUrl = "https://raw.githubusercontent.com/your-username/your-repository/main/words.csv"; // Replace with your GitHub raw file URL
+
+            fetch(csvUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split("\n").slice(1); // Remove header row
+                    words = lines.map(line => {
+                        const [word, group] = line.split(",");
+                        return { word: word.trim(), group: parseInt(group.trim()) };
+                    });
+                    renderGrid();
+                })
+                .catch(error => {
+                    console.error("Error loading CSV file:", error);
+                });
+        }
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function renderGrid() {
+            grid.innerHTML = "";
+            shuffle(words);
+            updateGrid();
+        }
+
+        function updateGrid() {
+            grid.innerHTML = "";
+            let sortedWords = [];
+            revealedGroups.forEach((_, group) => {
+                sortedWords.push(...words.filter(word => word.group === group));
+            });
+            sortedWords.push(...words.filter(word => !revealedGroups.has(word.group)));
+
+            sortedWords.forEach((item) => {
+                let div = document.createElement("div");
+                div.innerText = item.word;
+                div.classList.add("word");
+                div.dataset.group = item.group;
+                if (revealedGroups.has(item.group)) {
+                    div.classList.add(`correct-${item.group}`);
+                    div.onclick = null;
+                } else {
+                    div.onclick = () => toggleSelect(div);
+                }
+                grid.appendChild(div);
+            });
+        }
+
+        function shuffleUnrevealed() {
+            let revealed = words.filter(word => revealedGroups.has(word.group));
+            let unrevealed = shuffle(words.filter(word => !revealedGroups.has(word.group)));
+            words = [...revealed, ...unrevealed];
+            updateGrid();
+        }
+
+        function toggleSelect(element) {
+            if (element.classList.contains("selected")) {
+                element.classList.remove("selected");
+                selectedWords = selectedWords.filter(word => word !== element.innerText);
+            } else if (selectedWords.length < 4) {
+                element.classList.add("selected");
+                selectedWords.push(element.innerText);
+            }
+        }
+
+        function deselectAll() {
+            selectedWords.forEach(word => {
+                let wordElement = Array.from(grid.children).find(item => item.innerText === word);
+                if (wordElement) {
+                    wordElement.classList.remove("selected");
+                }
+            });
+            selectedWords = [];
+        }
+
+        function checkSelection() {
+            if (selectedWords.length !== 4) {
+                document.getElementById("message").innerText = "Select exactly four words.";
+                return;
+            }
+
+            const groups = selectedWords.map(word => {
+                return words.find(w => w.word === word).group;
+            });
+            const groupCounts = groups.reduce((acc, group) => {
+                acc[group] = (acc[group] || 0) + 1;
+                return acc;
+            }, {});
+
+            const allSameGroup = groups.every((val, i, arr) => val === arr[0]);
+            const hasThreeCorrect = Object.values(groupCounts).includes(3);
+
+            if (allSameGroup) {
+                const groupClass = `correct-${groups[0]}`;
+                revealedGroups.set(parseInt(groups[0]), true);
+                selectedWords.forEach(word => {
+                    let word
