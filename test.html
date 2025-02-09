@@ -54,30 +54,24 @@
         const incorrectCountDisplay = document.getElementById("incorrectCount");
         let revealedGroups = new Map();
 
-function loadCSV() {
-    const csvUrl = "http://gobuj.com/words.csv"; // Updated to point to your domain
+function loadJSON() {
+    const jsonUrl = "http://gobuj.com/words.json"; // Updated to point to your JSON file
 
-    console.log("Fetching CSV file from:", csvUrl); // Log URL to check
-    fetch(csvUrl)
+    console.log("Fetching JSON file from:", jsonUrl); // Log URL to check
+    fetch(jsonUrl)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
-            return response.text();
+            return response.json(); // Parse the JSON directly
         })
         .then(data => {
-            console.log("CSV data loaded:", data); // Log the raw CSV data
-            const lines = data.split("\n").slice(1); // Remove header row
-            console.log("CSV lines:", lines); // Log the lines after splitting
-            words = lines.map(line => {
-                const [word, group] = line.split(",");
-                return { word: word.trim(), group: parseInt(group.trim()) };
-            });
-            console.log("Parsed words:", words); // Log the parsed words array
+            console.log("JSON data loaded:", data); // Log the loaded data
+            words = data; // Directly assign the JSON array
             renderGrid();
         })
         .catch(error => {
-            console.error("Error loading CSV file:", error);
+            console.error("Error loading JSON file:", error);
         });
 }
 
