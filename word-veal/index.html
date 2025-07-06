@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Word Guess</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #111;
+    color: #fff;
+  }
+  .letter {
+    display: inline-block;
+    margin: 5px;
+  }
+  .pixel-row {
+    height: 10px;
+  }
+  .pixel {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 1px;
+    background: #333;
+  }
+  .pixel.on {
+    background: #0f0;
+  }
+  input {
+    padding: 5px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<h1>Pixel Word Guess</h1>
+<div id="wordDisplay"></div>
+<input type="text" id="guessInput" maxlength="5" placeholder="Enter 5-letter word">
+<button onclick="submitGuess()">Guess</button>
+<p id="message"></p>
+<script>
+const pixelAlphabet = {
+  A: ["  X  "," X X ","XXXXX","X   X","X   X","X   X"],
+  B: ["XXXX ","X   X","XXXX ","X   X","X   X","XXXX "],
+  C: [" XXXX","X    ","X    ","X    ","X    "," XXXX"],
+  D: ["XXXX ","X   X","X   X","X   X","X   X","XXXX "],
+  E: ["XXXXX","X    ","XXXX ","X    ","X    ","XXXXX"],
+  F: ["XXXXX","X    ","XXXX ","X    ","X    ","X    "],
+  G: [" XXXX","X    ","X  XX","X   X","X   X"," XXXX"],
+  H: ["X   X","X   X","XXXXX","X   X","X   X","X   X"],
+  I: [" XXX ","  X  ","  X  ","  X  ","  X  "," XXX "],
+  J: ["  XXX","   X ","   X ","   X ","X  X "," XX  "],
+  K: ["X   X","X  X ","XXX  ","X  X ","X   X","X   X"],
+  L: ["X    ","X    ","X    ","X    ","X    ","XXXXX"],
+  M: ["X   X","XX XX","X X X","X   X","X   X","X   X"],
+  N: ["X   X","XX  X","X X X","X  XX","X   X","X   X"],
+  O: [" XXX ","X   X","X   X","X   X","X   X"," XXX "],
+  P: ["XXXX ","X   X","XXXX ","X    ","X    ","X    "],
+  Q: [" XXX ","X   X","X   X","X X X","X  X "," XX X"],
+  R: ["XXXX ","X   X","XXXX ","X  X ","X   X","X   X"],
+  S: [" XXXX","X    "," XXX ","    X","    X","XXXX "],
+  T: ["XXXXX","  X  ","  X  ","  X  ","  X  ","  X  "],
+  U: ["X   X","X   X","X   X","X   X","X   X"," XXX "],
+  V: ["X   X","X   X","X   X","X   X"," X X ","  X  "],
+  W: ["X   X","X   X","X   X","X X X","XX XX","X   X"],
+  X: ["X   X"," X X ","  X  "," X X ","X   X","X   X"],
+  Y: ["X   X"," X X ","  X  ","  X  ","  X  ","  X  "],
+  Z: ["XXXXX","   X ","  X  "," X   ","X    ","XXXXX"]
+};
+
+const wordToGuess = "APPLE";
+let currentRow = 1;
+const maxGuesses = 6;
+
+function renderWord() {
+  const container = document.getElementById('wordDisplay');
+  container.innerHTML = '';
+  for (let letter of wordToGuess) {
+    const letterDiv = document.createElement('div');
+    letterDiv.className = 'letter';
+    for (let i = 0; i < currentRow; i++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'pixel-row';
+      const row = pixelAlphabet[letter][i] || "";
+      for (let char of row) {
+        const pixel = document.createElement('div');
+        pixel.className = 'pixel';
+        if (char === 'X') pixel.classList.add('on');
+        rowDiv.appendChild(pixel);
+      }
+      letterDiv.appendChild(rowDiv);
+    }
+    container.appendChild(letterDiv);
+  }
+}
+
+function submitGuess() {
+  const input = document.getElementById('guessInput');
+  const guess = input.value.toUpperCase();
+  if (guess.length !== 5) return alert("Enter a 5-letter word");
+
+  if (guess === wordToGuess) {
+    currentRow = 6;
+    renderWord();
+    document.getElementById('message').innerText = "You Win!";
+  } else {
+    currentRow++;
+    if (currentRow > maxGuesses) {
+      currentRow = maxGuesses;
+      document.getElementById('message').innerText = `Out of guesses! Word was ${wordToGuess}`;
+    }
+    renderWord();
+  }
+  input.value = '';
+}
+
+renderWord();
+</script>
+</body>
+</html>
